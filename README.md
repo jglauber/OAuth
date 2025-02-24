@@ -106,7 +106,20 @@ oauth.update_client(client_id='0083c1b7e3a6ceeac4a4f47bd3a1b501',
                     new_client_secret=True)
 ```
 
+### Run the Authorization Server
+
+The authorization server is a Flask server configured with a "/token" route.
+
+```python
+app = oauth.auth_server()
+app.run(debug=True)
+```
+
+The run method of app is appropriate for testing locally. In production, please use a WSGI production server such as [Gunicorn](https://gunicorn.org/)
+
 ### Request a Token
+
+The Authorization server must be running to request a token.
 
 ```python
 token = client_request_token('client_credentials',
@@ -116,11 +129,26 @@ token = client_request_token('client_credentials',
                              'http://127.0.0.1:5001/token')
 ```
 
-### Request Protected Resource
+### Run the Resource Server
 
-This uses the token variable from above:
+The resource server is a Flask server. The user can specify two parameters:
+
+1. The default api route ('api_v0.0.1' in the example below).
+2. The path and filename of the protected resource. *Note* the protected resource must be a json file.
+3. As with the Authorization server, the run method is appropriate for local testing but a production WSGI server should be used in production.
 
 ```python
+app = oauth.resource_server('api_v0.0.1','protected_resource.json')
+app.run(debug=True, port=5001)
+```
+
+### Request Protected Resource
+
+The Resource Server must be running to request the protected resource.
+*Note* The route /api_v0.0.1 is the same route specified when starting the Resource Server.
+
+```python
+# This uses the token variable from the initial token request.
 client_request_resource('http://127.0.0.1:5001/api_v0.0.1',token)
 # returns the protected resource as a json string.
 # {"about": "This is a protected resource"}
