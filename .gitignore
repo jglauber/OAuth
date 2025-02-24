@@ -169,3 +169,13 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# development .py scripts
+run_resource_server.py
+run_auth_server.py
+request_resource.py
+request_token_test.py
+client_generator_test.py
+
+# json files like tokens and resources
+*.json
