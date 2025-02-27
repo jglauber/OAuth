@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API &#8212; oauth_client 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to OAuth_Client" href="README.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="api">
+<h1>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h1>
+<p>The following documentation describes the classes and functions available for use. The documentation is divided into three groups:
+1. The OAuth class which is the public API
+2. The client management API
+3. The server API</p>
+<section id="oauth">
+<h2>1. OAuth<a class="headerlink" href="#oauth" title="Link to this heading">¶</a></h2>
+<p>The OAuth class is the primary user interface for the oauth_client package.</p>
+<dl>
+<dt><strong>The OAuth Class</strong></dt><dd><dl class="py class">
+<dt class="sig sig-object py" id="oauth_client.OAuth">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">oauth_client.</span></span><span class="sig-name descname"><span class="pre">OAuth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_create_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_owner_username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jwt_issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jwt_subject</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jwt_audience</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.OAuth" title="Link to this definition">¶</a></dt>
+<dd><p>OAuth_Client is a tool to help share data between two machines using the     OAuth2.0 client credentials process.</p>
+<dl class="simple">
+<dt>The OAuth Class serves as the primary entrypoint and allows users to:</dt><dd><ul class="simple">
+<li><p>Create and manage clients through a PostgreSQL backend.</p></li>
+<li><p>Generate Resource Owner Signatures</p></li>
+<li><p>Handle the authorization flow</p></li>
+<li><p>Create web tokens for access</p></li>
+<li><p>Serve requests for protected resources</p></li>
+</ul>
+</dd>
+<dt>In general, there should be good separation of these resources as follows:</dt><dd><ol class="arabic simple">
+<li><p>The PostgreSQL server (established with 2 users: an admin and a viewer)</p></li>
+<li><p>The Authorization server (with stored signature, access to the PostgreSQL server)</p></li>
+<li><p>The Resource server (with access to the public key of the stored signature)</p></li>
+</ol>
+</dd>
+</dl>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>db_name<span class="classifier">str</span></dt><dd><p>The name of the database in PostgreSQL. We suggest “clientdb” but can be any valid string.</p>
+</dd>
+<dt>db_host<span class="classifier">str</span></dt><dd><p>The host IP address of the PostgreSQL server. For testing, this can be localhost. For production,         the server should exist on a dedicated VM likely with a reverse proxy.</p>
+</dd>
+<dt>db_table_name<span class="classifier">str</span></dt><dd><p>The name of the table to store the client credentials. We suggest “stored_tokens”.</p>
+</dd>
+<dt>db_create_table<span class="classifier">bool</span></dt><dd><p>Create the table to store the client credentials in the PostgreSQL database. Usually this will be         False as the table only needs to be generated once and can be generated using the psql cli directly         instead of the Python method.</p>
+</dd>
+<dt>resource_owner_username<span class="classifier">str</span></dt><dd><p>The username for the resource owner that will be signing the token.</p>
+</dd>
+<dt>jwt_issuer<span class="classifier">str</span></dt><dd><p>The issuer of the jwt token. Likely the same as the resource owner.</p>
+</dd>
+<dt>jwt_subject<span class="classifier">str</span></dt><dd><p>The user who requested the token (i.e. the authorized client).</p>
+</dd>
+<dt>jwt_audience<span class="classifier">str</span></dt><dd><p>The recipient for which the token is intended i.e. the resource server.</p>
+</dd>
+</dl>
+</section>
+<section id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>add_client()</dt><dd><p>Adds a new client to the PostgreSQL database.</p>
+</dd>
+<dt>remove_client()</dt><dd><p>Removes an existing client from the PostgreSQL database.</p>
+</dd>
+<dt>update_client()</dt><dd><p>Update a client’s grant type, resource, or generate a new client secret.</p>
+</dd>
+<dt>create_signature()</dt><dd><p>Create the resource owner signature for jwt token generation.</p>
+</dd>
+<dt>server_create_token()</dt><dd><p>Create a new token for the Authorization server to send to the authorized client.</p>
+</dd>
+<dt>auth_server()</dt><dd><p>Run the authorization server.</p>
+</dd>
+<dt>resource_server()</dt><dd><p>Run the resource server</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd>
+</dl>
+<p>There are also two client facing functions that allow the client to request a token and with that token to request a protected resource.</p>
+<dl>
+<dt><strong>Request a Token</strong></dt><dd><dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.client_request_token">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.</span></span><span class="sig-name descname"><span class="pre">client_request_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grant_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_secret</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_request_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#oauth_client.client_request_token" title="Link to this definition">¶</a></dt>
+<dd><p>A function that allows a client to request the access token.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>grant_type<span class="classifier">str</span></dt><dd><p>The type of grant that has been given to a client.</p>
+</dd>
+<dt>client_id<span class="classifier">str</span></dt><dd><p>The client id issued to a client.</p>
+</dd>
+<dt>client_secret<span class="classifier">str</span></dt><dd><p>The client secret issued to a client.</p>
+</dd>
+<dt>resource<span class="classifier">str</span></dt><dd><p>The resource a client is authorized to access.</p>
+</dd>
+<dt>token_request_url<span class="classifier">str</span></dt><dd><p>The URL of the authorization server that issues the token.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>string</dt><dd><p>The token as a jwt string.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd>
+<dt><strong>Request a Protected Resource</strong></dt><dd><dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.client_request_resource">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.</span></span><span class="sig-name descname"><span class="pre">client_request_resource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#oauth_client.client_request_resource" title="Link to this definition">¶</a></dt>
+<dd><p>A function that allows a client with valid token to access a protected resource.</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>resource_url<span class="classifier">str</span></dt><dd><p>The fully qualified URL including http/https and api_route for the resource.  
+<em>Example</em> <a class="reference external" href="http://127.0.0.1/api_v0.0.1">http://127.0.0.1/api_v0.0.1</a></p>
+</dd>
+<dt>token<span class="classifier">str</span></dt><dd><p>The access token.</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h3>Returns<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>string</dt><dd><p>The json string of the protected resource.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd>
+</dl>
+</section>
+<section id="client-management">
+<h2>2. Client management<a class="headerlink" href="#client-management" title="Link to this heading">¶</a></h2>
+<p>Client management classes and functions provide lower level funcionality upon which the OAuth class depends. The documentation that follows allows developers and users more control over the public API.</p>
+<dl>
+<dt><strong>The Client Management Module</strong></dt><dd><dl class="py class" id="module-oauth_client.client_management">
+<dt class="sig sig-object py" id="oauth_client.client_management.Client">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">Client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grant_type:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'client_credentials'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_date:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'27022025_12:00:47'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_client:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.Client" title="Link to this definition">¶</a></dt>
+<dd><p>A class to handle creation and maintenance of authorized clients.</p>
+<p>…</p>
+<section id="id3">
+<h3>Attributes<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>name<span class="classifier">str</span></dt><dd><p>The name of the authorized user.</p>
+</dd>
+<dt>grant_type<span class="classifier">str</span></dt><dd><p>The type of grant to allow. <em>Default</em> client_credentials</p>
+</dd>
+<dt>resource<span class="classifier">str</span></dt><dd><p>The resource on the server that the client is allowed to access.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Methods<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>generate()</dt><dd><p>Creates a new client with client id and client secret.</p>
+</dd>
+<dt>store(db, host, table_name)</dt><dd><p>Stores the client id, grant type, resource, and a salted and hashed client secret.
+In addition, this function deletes the stored client information from the class.</p>
+</dd>
+<dt>verify(client_id: str, client_secret: str, grant_type: str,        resource: str, db, host, table_name, pgpass=False)</dt><dd><p>Compares the stored credentials against the user provided credentials and returns True
+if all parameters match</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Client.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.Client.generate" title="Link to this definition">¶</a></dt>
+<dd><p>Create a new client consisting of a grant_type, client_id        client_secret, and resource.</p>
+<section id="id5">
+<h4>Returns<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>dict</dt><dd><p>a client dictionary.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Client.store">
+<span class="sig-name descname"><span class="pre">store</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.Client.store" title="Link to this definition">¶</a></dt>
+<dd><p>Store the client information in the PostgreSQL database and        delete any references from memory.</p>
+<section id="id6">
+<h4>Parameters<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>db<span class="classifier">str</span></dt><dd><p>The name of the database.</p>
+</dd>
+<dt>host<span class="classifier">str</span></dt><dd><p>The host IP address of the PostgreSQL server.</p>
+</dd>
+<dt>table_name<span class="classifier">str</span></dt><dd><p>The name of the table in the database.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Client.verify">
+<span class="sig-name descname"><span class="pre">verify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_secret</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grant_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pgpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#oauth_client.client_management.Client.verify" title="Link to this definition">¶</a></dt>
+<dd><p>Verify that the provided client id, client secret, grant type and resource        exactly match the database.</p>
+<section id="id7">
+<h4>Parameters<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<dl>
+<dt>client_id<span class="classifier">str</span></dt><dd><p>The client id to verify.</p>
+</dd>
+<dt>grant_type<span class="classifier">str</span></dt><dd><p>The type of grant provided to the user.</p>
+</dd>
+<dt>resource<span class="classifier">str</span></dt><dd><p>The resource on the server that the client is allowed to access.</p>
+</dd>
+<dt>db<span class="classifier">str</span></dt><dd><p>The name of the database.</p>
+</dd>
+<dt>host<span class="classifier">str</span></dt><dd><p>The host IP address of the PostgreSQL server.</p>
+</dd>
+<dt>table_name<span class="classifier">str</span></dt><dd><p>The name of the table in the database.</p>
+</dd>
+<dt>pgpass<span class="classifier">bool</span></dt><dd><p>When set to True, the program will search for a .pgpass file (linux) in the /home/username directory.
+The file should contain a string in the format:</p>
+<p><code class="docutils literal notranslate"><span class="pre">host:port:db_name:username:password</span></code></p>
+<p>By default, this parameter is set to False which forces the user to authenitcate via the command line.</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h4>Returns<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>literal[True] | None</dt><dd><p>True if all provided parameters match the database and False if any one does not exactly match.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="oauth_client.client_management.GenerateKeyPairs">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">GenerateKeyPairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.GenerateKeyPairs" title="Link to this definition">¶</a></dt>
+<dd><p>A class to create the jwt signature for use by the resource owner to sign tokens.</p>
+<p>…</p>
+<section id="id9">
+<h3>Attributes<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>kid</dt><dd><p>The randomly generated key id.</p>
+</dd>
+<dt>key</dt><dd><p>The randomly generated key using the jwcrypto package.</p>
+</dd>
+<dt>private_key</dt><dd><p>The private key.</p>
+</dd>
+<dt>public_key</dt><dd><p>The public key.</p>
+</dd>
+<dt>username</dt><dd><p>The username of the resource owner.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h3>Methods<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>store_keys()</dt><dd><p>Stores the kid, public key, and private key in a keyring and         deletes the binding and variables from memory.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.GenerateKeyPairs.store_keys">
+<span class="sig-name descname"><span class="pre">store_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.GenerateKeyPairs.store_keys" title="Link to this definition">¶</a></dt>
+<dd><p>A method to store the signature in a keyring.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="oauth_client.client_management.PostgreSqlHelper">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">PostgreSqlHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'clientdb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pgpass</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.PostgreSqlHelper" title="Link to this definition">¶</a></dt>
+<dd><p>A class to handle interactions with the PostgreSQL backend.</p>
+<p>…</p>
+<section id="id11">
+<h3>Attributes<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<dl>
+<dt>database_name<span class="classifier">str</span></dt><dd><p>The name of the PostgreSQL database.</p>
+</dd>
+<dt>host<span class="classifier">str</span></dt><dd><p>The database host address.</p>
+</dd>
+<dt>pgpass<span class="classifier">bool</span></dt><dd><p>When set to True, the program will search for a .pgpass file (linux) in the /home/username directory.
+The file should contain a string in the format:</p>
+<p><code class="docutils literal notranslate"><span class="pre">host:port:db_name:username:password</span></code></p>
+<p>By default, this parameter is set to False which forces the user to authenitcate via the command line.</p>
+</dd>
+<dt>client_keys<span class="classifier">list</span></dt><dd><p>A list of the default columns to include in the table that stores client id and client secret.</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h3>Methods<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>connect()</dt><dd><p>Establishes a connection to the db and returns a Connection tuple with con connection and cur cursor classes</p>
+</dd>
+<dt>close(con,cur)</dt><dd><p>Closes the db connection</p>
+</dd>
+<dt>create(cur, con, table_name, column, data = None)</dt><dd><p>Creates a table in the db</p>
+</dd>
+<dt>add(cur, con, table_name, data)</dt><dd><p>Adds to a table in the db</p>
+</dd>
+<dt>query(self, cur, query)</dt><dd><p>Query the connected db</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.PostgreSqlHelper.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cursor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">con</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.PostgreSqlHelper.add" title="Link to this definition">¶</a></dt>
+<dd><p>Adds data to a table.</p>
+<section id="id13">
+<h4>Parameters<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>cur<span class="classifier">cursor</span></dt><dd><p>The cursor class</p>
+</dd>
+<dt>con<span class="classifier">connection</span></dt><dd><p>The connection class</p>
+</dd>
+<dt>table_name<span class="classifier">str</span></dt><dd><p>The name of the table to create in the PostgreSQL database.</p>
+</dd>
+<dt>data<span class="classifier">list</span></dt><dd><p>A list of values to store in the table. The list represents            a row of data where each value is a column.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.PostgreSqlHelper.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">con</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cursor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#oauth_client.client_management.PostgreSqlHelper.close" title="Link to this definition">¶</a></dt>
+<dd><p>Closes the PostgreSQL database connection.</p>
+<section id="id14">
+<h4>Parameters<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>con<span class="classifier">connection</span></dt><dd><p>The connection class.</p>
+</dd>
+<dt>cur<span class="classifier">cursor</span></dt><dd><p>The cursor class.</p>
+</dd>
+</dl>
+</section>
+<section id="id15">
+<h4>Returns<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>literal[True] | None</dt><dd><p>True if closing the connection was successful. Otherwise            returns None.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.PostgreSqlHelper.connect">
+<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Connection</span></span></span><a class="headerlink" href="#oauth_client.client_management.PostgreSqlHelper.connect" title="Link to this definition">¶</a></dt>
+<dd><p>Establishes a connection with the PostgreSQL server and returns a Connection class tuple.</p>
+<section id="id16">
+<h4>Returns<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>tuple</dt><dd><p>A connection tuple with connection (con) and cursor (cur) classes</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.PostgreSqlHelper.create">
+<span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cursor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">con</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.PostgreSqlHelper.create" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a new table in the PostgreSQL database.</p>
+<section id="id17">
+<h4>Parameters<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h4>
+<dl>
+<dt>cur<span class="classifier">cursor</span></dt><dd><p>The cursor class</p>
+</dd>
+<dt>con<span class="classifier">connection</span></dt><dd><p>The connection class</p>
+</dd>
+<dt>table_name<span class="classifier">str</span></dt><dd><p>The name of the table to create in the PostgreSQL database.</p>
+</dd>
+<dt>column<span class="classifier">list</span></dt><dd><p>A list of columns along with their datatypes.</p>
+<p><em>Example</em> “[‘grant_type varchar’, ‘client_id varchar’,            ‘client_secret varchar’, ‘resource varchar’]”</p>
+</dd>
+<dt>data<span class="classifier">list</span></dt><dd><p>A list of values to store in the table. The list represents            a row of data where each value is a column.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.PostgreSqlHelper.edit">
+<span class="sig-name descname"><span class="pre">edit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cursor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">con</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edit_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.PostgreSqlHelper.edit" title="Link to this definition">¶</a></dt>
+<dd><p>Edit a client in the database.</p>
+<section id="id18">
+<h4>Parameters<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>cur<span class="classifier">cursor</span></dt><dd><p>The cursor class</p>
+</dd>
+<dt>con<span class="classifier">connection</span></dt><dd><p>The connection class</p>
+</dd>
+<dt>client_id<span class="classifier">str</span></dt><dd><p>The client id to remove from the database.</p>
+</dd>
+<dt>edit_list<span class="classifier">list</span></dt><dd><p>A list of tuples specifying the column name and value with which to replace            the existing values.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.PostgreSqlHelper.query">
+<span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cursor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#oauth_client.client_management.PostgreSqlHelper.query" title="Link to this definition">¶</a></dt>
+<dd><p>Perform a SQL query of the database.</p>
+<section id="id19">
+<h4>Parameters<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>cur<span class="classifier">cursor</span></dt><dd><p>The cursor class</p>
+</dd>
+<dt>query<span class="classifier">str</span></dt><dd><p>The SQL query to perform. <em>Note</em> query string must end with a semicolon.</p>
+</dd>
+</dl>
+</section>
+<section id="id20">
+<h4>Returns<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>list</dt><dd><p>a list of all matching values.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.PostgreSqlHelper.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cursor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">con</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.PostgreSqlHelper.remove" title="Link to this definition">¶</a></dt>
+<dd><p>Removes a client from the database.</p>
+<section id="id21">
+<h4>Parameters<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>cur<span class="classifier">cursor</span></dt><dd><p>The cursor class</p>
+</dd>
+<dt>con<span class="classifier">connection</span></dt><dd><p>The connection class</p>
+</dd>
+<dt>table_name<span class="classifier">str</span></dt><dd><p>The name of the table to create in the PostgreSQL database.</p>
+</dd>
+<dt>client_id<span class="classifier">str</span></dt><dd><p>The client id to remove from the database.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="oauth_client.client_management.Token">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">Token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grant_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_secret</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_request_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.Token" title="Link to this definition">¶</a></dt>
+<dd><p>A class to handle token requests to the authorization server.</p>
+<p>…</p>
+<section id="id22">
+<h3>Attributes<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>values<span class="classifier">str</span></dt><dd><p>The stored token.</p>
+</dd>
+<dt>grant_type<span class="classifier">str</span></dt><dd><p>The type of grant that has been given to a client.</p>
+</dd>
+<dt>client_id<span class="classifier">str</span></dt><dd><p>The client id issued to a client.</p>
+</dd>
+<dt>client_secret<span class="classifier">str</span></dt><dd><p>The client secret issued to a client.</p>
+</dd>
+<dt>resource<span class="classifier">str</span></dt><dd><p>The resource a client is authorized to access.</p>
+</dd>
+</dl>
+</section>
+<section id="id23">
+<h3>Methods<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>expires_on()</dt><dd><p>Returns a unix integer time.</p>
+</dd>
+<dt>expired()</dt><dd><p>Returns True if expired and False if not expired.</p>
+</dd>
+<dt>string()</dt><dd><p>Returns the access token jwt string.</p>
+</dd>
+<dt>type()</dt><dd><p>Returns the type of token which is identical to the grant type.</p>
+</dd>
+<dt>save()</dt><dd><p>Saves a token.json file at the root of the directory.</p>
+</dd>
+<dt>json()</dt><dd><p>Convert the token to a json string.</p>
+</dd>
+<dt>get_cached_token()</dt><dd><p>Retrieve the token if it exists as a token.json file. If not,         run get_new_token() method.</p>
+</dd>
+<dt>get_new_token()</dt><dd><p>A method to get a new token via an HTTP post reqeust.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Token.expired">
+<span class="sig-name descname"><span class="pre">expired</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#oauth_client.client_management.Token.expired" title="Link to this definition">¶</a></dt>
+<dd><p>Check if the token is expired.</p>
+<section id="id24">
+<h4>Returns<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>bool</dt><dd><p>Returns True if token is expired, otherwise returns False.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Token.expires_on">
+<span class="sig-name descname"><span class="pre">expires_on</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#oauth_client.client_management.Token.expires_on" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the integer unix date of expiration of the token.</p>
+<section id="id25">
+<h4>Returns<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>int</dt><dd><p>The unix date as an integer.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Token.get_cached_token">
+<span class="sig-name descname"><span class="pre">get_cached_token</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#oauth_client.client_management.Token.get_cached_token" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve the saved token and if not present, request a new token.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Token.get_new_token">
+<span class="sig-name descname"><span class="pre">get_new_token</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#oauth_client.client_management.Token.get_new_token" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve a new token.</p>
+<section id="id26">
+<h4>Returns<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>json</dt><dd><p>A json string representation of the token.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Token.json">
+<span class="sig-name descname"><span class="pre">json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#oauth_client.client_management.Token.json" title="Link to this definition">¶</a></dt>
+<dd><p>Get the json string of the token.</p>
+<section id="id27">
+<h4>Returns<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>string</dt><dd><p>The json token.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Token.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#oauth_client.client_management.Token.save" title="Link to this definition">¶</a></dt>
+<dd><p>Save the token as a json file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Token.string">
+<span class="sig-name descname"><span class="pre">string</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#oauth_client.client_management.Token.string" title="Link to this definition">¶</a></dt>
+<dd><p>Get the string representation of the token.</p>
+<section id="id28">
+<h4>Returns<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>string</dt><dd><p>The token as a jwt string.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.client_management.Token.type">
+<span class="sig-name descname"><span class="pre">type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#oauth_client.client_management.Token.type" title="Link to this definition">¶</a></dt>
+<dd><p>Get the grant type.</p>
+<section id="id29">
+<h4>Returns<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>string</dt><dd><p>The grant type as a string.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.client_management.create_table">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">create_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#oauth_client.client_management.create_table" title="Link to this definition">¶</a></dt>
+<dd><p>A function to create a table in a database.</p>
+<section id="id30">
+<h3>Parameters<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>db<span class="classifier">str</span></dt><dd><p>The name of the database.</p>
+</dd>
+<dt>host<span class="classifier">str</span></dt><dd><p>The host IP address of the PostgreSQL server.</p>
+</dd>
+<dt>table_name<span class="classifier">str</span></dt><dd><p>The name of the table in the database.</p>
+</dd>
+</dl>
+</section>
+<section id="id31">
+<h3>Returns<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>literal[True] | None</dt><dd><p>True if successful.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.client_management.edit_client">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">edit_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grant_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_client_secret</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#oauth_client.client_management.edit_client" title="Link to this definition">¶</a></dt>
+<dd><p>A function to edit a client in the database.</p>
+<section id="id32">
+<h3>Parameters<a class="headerlink" href="#id32" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>db<span class="classifier">str</span></dt><dd><p>The name of the PostgreSQL database.</p>
+</dd>
+<dt>host<span class="classifier">str</span></dt><dd><p>The IP address of the database.</p>
+</dd>
+<dt>client_id<span class="classifier">str</span></dt><dd><p>The client id associated with the client that will be edited.</p>
+</dd>
+<dt>grant_type<span class="classifier">str</span></dt><dd><p>The type of credential grant.</p>
+</dd>
+<dt>resource<span class="classifier">str</span></dt><dd><p>The name of the protected resource.</p>
+</dd>
+<dt>new_client_secret<span class="classifier">bool</span></dt><dd><p>If True, this will create a new client secret for the client id.</p>
+</dd>
+</dl>
+</section>
+<section id="id33">
+<h3>Returns<a class="headerlink" href="#id33" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>literal[True] | None</dt><dd><p>True if successful.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.client_management.get_api_content">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">get_api_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.get_api_content" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve the content of the protected resource.</p>
+<section id="id34">
+<h3>Parameters<a class="headerlink" href="#id34" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>resource_url<span class="classifier">str</span></dt><dd><p>The full url including http/https and /token path to        access and request the protected resource.</p>
+</dd>
+<dt>token<span class="classifier">str</span></dt><dd><p>The jwt token string used to access the api content.</p>
+</dd>
+</dl>
+</section>
+<section id="id35">
+<h3>Returns<a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>string</dt><dd><p>The json encoded response.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.client_management.remove">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#oauth_client.client_management.remove" title="Link to this definition">¶</a></dt>
+<dd><p>A function to remove a client from the database.</p>
+<section id="id36">
+<h3>Parameters<a class="headerlink" href="#id36" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>db<span class="classifier">str</span></dt><dd><p>The name of the database.</p>
+</dd>
+<dt>host<span class="classifier">str</span></dt><dd><p>The host IP address of the PostgreSQL server.</p>
+</dd>
+<dt>table_name<span class="classifier">str</span></dt><dd><p>The name of the table in the database.</p>
+</dd>
+<dt>client_id<span class="classifier">str</span></dt><dd><p>The client to remove from the database.</p>
+</dd>
+</dl>
+</section>
+<section id="id37">
+<h3>Returns<a class="headerlink" href="#id37" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>literal[True] | None</dt><dd><p>True if successful.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.client_management.retrieve_kid">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">retrieve_kid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.retrieve_kid" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve the key id (kid) of the signature from the keyring storage.</p>
+<section id="id38">
+<h3>Parameters<a class="headerlink" href="#id38" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>username<span class="classifier">str</span></dt><dd><p>The username of the resource owner that signed the jwt access token.</p>
+</dd>
+</dl>
+</section>
+<section id="id39">
+<h3>Returns<a class="headerlink" href="#id39" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>string</dt><dd><p>The key id.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.client_management.retrieve_private_key">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">retrieve_private_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.retrieve_private_key" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve the private key of the signature from the keyring storage.</p>
+<section id="id40">
+<h3>Parameters<a class="headerlink" href="#id40" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>username<span class="classifier">str</span></dt><dd><p>The username of the resource owner that signed the jwt access token.</p>
+</dd>
+</dl>
+</section>
+<section id="id41">
+<h3>Returns<a class="headerlink" href="#id41" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>string</dt><dd><p>The private key.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.client_management.retrieve_pub_key">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">retrieve_pub_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.retrieve_pub_key" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve the public key of the signature from the keyring storage.</p>
+<section id="id42">
+<h3>Parameters<a class="headerlink" href="#id42" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>username<span class="classifier">str</span></dt><dd><p>The username of the resource owner that signed the jwt access token.</p>
+</dd>
+</dl>
+</section>
+<section id="id43">
+<h3>Returns<a class="headerlink" href="#id43" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>string</dt><dd><p>The public key.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd>
+</dl>
+</section>
+<section id="servers">
+<h2>3. Servers<a class="headerlink" href="#servers" title="Link to this heading">¶</a></h2>
+<p>The Server functions allow the OAuth class to create an Authorization server and a Resource Server. These should always live on two distinct machines.</p>
+<dl>
+<dt><strong>Authorization Server</strong></dt><dd><dl class="py class" id="module-oauth_client.servers.auth_server">
+<dt class="sig sig-object py" id="oauth_client.servers.auth_server.CreateToken">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">oauth_client.servers.auth_server.</span></span><span class="sig-name descname"><span class="pre">CreateToken</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aud</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.servers.auth_server.CreateToken" title="Link to this definition">¶</a></dt>
+<dd><p>A class for use by the Authorization server to create a new token for an authorized client.</p>
+<p>…</p>
+<section id="id44">
+<h3>Attributes<a class="headerlink" href="#id44" title="Link to this heading">¶</a></h3>
+</section>
+<section id="id45">
+<h3>Methods<a class="headerlink" href="#id45" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>generate_new_token()</dt><dd><p>Creates a new signed jwt token.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="oauth_client.servers.auth_server.CreateToken.generate_new_token">
+<span class="sig-name descname"><span class="pre">generate_new_token</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#oauth_client.servers.auth_server.CreateToken.generate_new_token" title="Link to this definition">¶</a></dt>
+<dd><p>Create the new token.</p>
+<section id="id46">
+<h4>Returns<a class="headerlink" href="#id46" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>dict</dt><dd><p>a dictionary with:
+* token_type: The grant type.
+* expires_on: The unix timestamp of token expiry.
+* not_before: The unix timestamp of token expiry.
+* resource: The authorized resource
+* access_token: The jwt access token.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.servers.auth_server.create_auth_server">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.servers.auth_server.</span></span><span class="sig-name descname"><span class="pre">create_auth_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audience</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Flask</span></span></span><a class="headerlink" href="#oauth_client.servers.auth_server.create_auth_server" title="Link to this definition">¶</a></dt>
+<dd><p>Create the Flask server to handle token requests.</p>
+<section id="id47">
+<h3>Parameters<a class="headerlink" href="#id47" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>db<span class="classifier">str</span></dt><dd><p>The name of the PostgreSQL database.</p>
+</dd>
+<dt>host<span class="classifier">str</span></dt><dd><p>The host IP address for the PostgreSQL database.</p>
+</dd>
+<dt>table_name<span class="classifier">str</span></dt><dd><p>The name of the table storing the client credentials.</p>
+</dd>
+<dt>username<span class="classifier">str</span></dt><dd><p>The username of the resource owner that is the signer of the jwt token.</p>
+</dd>
+<dt>issuer<span class="classifier">str</span></dt><dd><p>The issuer of the token.</p>
+</dd>
+<dt>subject<span class="classifier">str</span></dt><dd><p>The subject of the token.</p>
+</dd>
+<dt>audience<span class="classifier">str</span></dt><dd><p>The audience of the token.</p>
+</dd>
+</dl>
+</section>
+<section id="id48">
+<h3>Returns<a class="headerlink" href="#id48" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>Flask</dt><dd><p>A flask server object.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="oauth_client.servers.auth_server.decode_token">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.servers.auth_server.</span></span><span class="sig-name descname"><span class="pre">decode_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">public_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aud</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#oauth_client.servers.auth_server.decode_token" title="Link to this definition">¶</a></dt>
+<dd><p>A function to decode a jwt token and confirm its validity.</p>
+<section id="id49">
+<h3>Parameters<a class="headerlink" href="#id49" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>token</dt><dd><p>The token string.</p>
+</dd>
+<dt>public_key</dt><dd><p>The public key used to sign the token.</p>
+</dd>
+<dt>aud<span class="classifier">str</span></dt><dd><p>The audience of the token.</p>
+</dd>
+<dt>iss<span class="classifier">str</span></dt><dd><p>The issuer of the token.</p>
+</dd>
+</dl>
+</section>
+<section id="id50">
+<h3>Returns<a class="headerlink" href="#id50" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>literal[True] | None</dt><dd><p>True if token is valid otherwise returns None.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd>
+<dt><strong>Resource Server</strong></dt><dd><dl class="py function" id="module-oauth_client.servers.resource_server">
+<dt class="sig sig-object py" id="oauth_client.servers.resource_server.create_resource_server">
+<span class="sig-prename descclassname"><span class="pre">oauth_client.servers.resource_server.</span></span><span class="sig-name descname"><span class="pre">create_resource_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Flask</span></span></span><a class="headerlink" href="#oauth_client.servers.resource_server.create_resource_server" title="Link to this definition">¶</a></dt>
+<dd><p>Create the resource server to handle requests for the protected resource.</p>
+<section id="id51">
+<h3>Parameters<a class="headerlink" href="#id51" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>username<span class="classifier">str</span></dt><dd><p>The username of the resource server owner that signed the token.</p>
+</dd>
+<dt>issuer<span class="classifier">str</span></dt><dd><p>The issuer of the token.</p>
+</dd>
+<dt>api_route<span class="classifier">str</span></dt><dd><p>The URL route to host the resource server.</p>
+</dd>
+<dt>resource_path<span class="classifier">str</span></dt><dd><p>The relative path of the json file on the resource server.</p>
+</dd>
+</dl>
+</section>
+<section id="id52">
+<h3>Returns<a class="headerlink" href="#id52" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>Flask</dt><dd><p>a flask server object.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd>
+</dl>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">oauth_client</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">Welcome to OAuth_Client</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#oauth">1. OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#client-management">2. Client management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#servers">3. Servers</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="README.html" title="previous chapter">Welcome to OAuth_Client</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, John Glauber.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

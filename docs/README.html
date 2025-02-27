@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Welcome to OAuth_Client &#8212; oauth_client 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API" href="api.html" />
+    <link rel="prev" title="OAuth_Client Documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="welcome-to-oauth-client">
+<h1>Welcome to OAuth_Client<a class="headerlink" href="#welcome-to-oauth-client" title="Link to this heading">¶</a></h1>
+<p>A tool written in Python 3.13 to implement OAuth2.0 using the client credentials grant type. This is intended for machine to machine APIs and integrates with a PostgreSQL server for storing client ids and hashed/salted client secrets. Please see requirements.txt for the full list of dependencies.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<p>Prior to installing this Python package, PostgreSQL must be installed on the target machine. This README is focused on Linux; however, with appropriate adjustments the program should run on Windows and Mac OS as well.</p>
+<p>Install PostgreSQL:<br />
+<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">postgresql</span></code></p>
+<p>Install all
+<a class="reference external" href="https://www.psycopg.org/docs/install.html#build-prerequisites">psycopg build prerequistes</a> including libpq and python3-dev.</p>
+<p>PostgreSQL will create a postgres superuser by default. We recommend creating two new users: one user that creates a table for storing client ids and hashed/salted client secrets and one user that has “SELECT” only rights to the table. This can be created as follows:</p>
+<ol class="arabic">
+<li><p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">-s</span></code> to switch to root.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">su</span> <span class="pre">-</span> <span class="pre">postgres</span></code> to switch to postgres super user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">psql</span></code> to launch the postgreSQL cli.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">USER</span> <span class="pre">your_admin_username</span> <span class="pre">WITH</span> <span class="pre">PASSWORD</span> <span class="pre">'your_password';</span></code></p>
+<p>For the admin that will create and maintain the database of client ids and secrets we suggest a user name that is meaningful to the specific user and a strong password.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">USER</span> <span class="pre">your_viewer_username</span> <span class="pre">WITH</span> <span class="pre">PASSWORD</span> <span class="pre">'your_password';</span></code></p>
+<p>For the viewer that will have “SELECT” only privileges, we suggest “auth_client” for the user name and a strong password.</p>
+<p>Create the database that will store the credentials. We suggest using ‘clientdb’.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">DATABASE</span> <span class="pre">clientdb;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exit</span></code> to exit the psql cli.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">su</span> <span class="pre">-</span> <span class="pre">your-admin-username</span></code> to switch to admin user and use the strong password that was created for this admin.</p>
+<p>Create the table to store client credentials. We suggest “stored_tokens”.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">TABLE</span> <span class="pre">stored_tokens;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GRANT</span> <span class="pre">SELECT</span> <span class="pre">ON</span> <span class="pre">stored_tokens</span> <span class="pre">TO</span> <span class="pre">auth_client;</span></code> to allow the viewer user access to view the contents of the table.</p></li>
+</ol>
+<p>After all the prerequisites have been met, you can install the package locally, using the following command from the root of the repo.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code></p>
+</section>
+<section id="program-structure">
+<h2>Program Structure<a class="headerlink" href="#program-structure" title="Link to this heading">¶</a></h2>
+<p>The oauth_client package contains three (3) critical components for enabling OAuth.</p>
+<ol class="arabic">
+<li><p>Client creation using client ids and client secrets.</p></li>
+<li><p>An Authorization server that checks that a client is allowed access to the protected resource and grants a json web token (jwt).</p></li>
+<li><p>A Protected Resource Server that verifies that the token is valid and responds with a protected json file.</p>
+<p>For more details, click this link for the full <a class="reference external" href="https://datatracker.ietf.org/doc/html/rfc6749">OAuth2.0 Specification</a></p>
+</li>
+</ol>
+</section>
+<section id="example-usage">
+<h2>Example Usage<a class="headerlink" href="#example-usage" title="Link to this heading">¶</a></h2>
+<p>The following examples demonstrate some of the basic capabilities. Please note that it is up to the user to ensure that they maintain good separation of resources. For instance, the Authorization server and Resource server should not reside on the same server. Similarly, the client data should not reside with the resource server.</p>
+<section id="create-the-oauth-class">
+<h3>Create the OAuth Class<a class="headerlink" href="#create-the-oauth-class" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">oauth_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">OAuth</span><span class="p">,</span> <span class="n">client_request_token</span><span class="p">,</span> <span class="n">client_request_resource</span>
+
+<span class="n">oauth</span> <span class="o">=</span> <span class="n">OAuth</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s1">&#39;clientdb&#39;</span><span class="p">,</span>
+              <span class="n">db_host</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span>
+              <span class="n">db_table_name</span><span class="o">=</span><span class="s1">&#39;stored_tokens&#39;</span><span class="p">,</span>
+              <span class="n">db_create_table</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+              <span class="n">resource_owner_username</span><span class="o">=</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span>
+              <span class="n">jwt_issuer</span><span class="o">=</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span>
+              <span class="n">jwt_audience</span><span class="o">=</span><span class="s1">&#39;client&#39;</span><span class="p">,</span>
+              <span class="n">jwt_subject</span><span class="o">=</span><span class="s1">&#39;client&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="create-a-signature">
+<h3>Create a Signature<a class="headerlink" href="#create-a-signature" title="Link to this heading">¶</a></h3>
+<p>This creates assymetric public and private key pairs for the admin. The signature is required for the admin to sign jwt tokens and is stored in a keyring. The private key and public key are both required to sign the jwt; however, only the public key is used to validate that the jwt is authentic. The signature should be stored on the authorization server.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">oauth</span><span class="o">.</span><span class="n">create_signature</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="create-a-new-authorized-client">
+<h3>Create a New Authorized Client<a class="headerlink" href="#create-a-new-authorized-client" title="Link to this heading">¶</a></h3>
+<p><em>Note</em> The client secret will be printed locally to the terminal. It will not be retrievable again after. All of the client ids and secrets are for demonstration purposes only. Please do not ever share or store client secrets in plain text.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">oauth</span><span class="o">.</span><span class="n">add_client</span><span class="p">(</span><span class="n">client_name</span><span class="o">=</span><span class="s1">&#39;Jane Doe&#39;</span><span class="p">,</span>
+                 <span class="n">grant_type</span><span class="o">=</span><span class="s1">&#39;client_credentials&#39;</span><span class="p">,</span>
+                 <span class="n">resource</span><span class="o">=</span><span class="s1">&#39;api_v0.0.1&#39;</span><span class="p">)</span>
+<span class="c1"># this will print the following to the console:</span>
+<span class="c1"># {</span>
+<span class="c1"># &quot;grant_type&quot;: &quot;client_credentials&quot;,</span>
+<span class="c1"># &quot;client_id&quot;: &quot;0083c1b7e3a6ceeac4a4f47bd3a1b501&quot;,</span>
+<span class="c1"># &quot;client_secret&quot;: &quot;PRIVATE-qGSUlXIyQVFB_xfPnHOy6WWGMER5uCgZyaKWgJw-ggQ&quot;</span>
+<span class="c1"># &quot;resource&quot;: &quot;api_v0.0.1&quot;</span>
+<span class="c1"># }</span>
+</pre></div>
+</div>
+</section>
+<section id="make-changes-to-an-existing-client">
+<h3>Make Changes to an Existing Client<a class="headerlink" href="#make-changes-to-an-existing-client" title="Link to this heading">¶</a></h3>
+<p>Client grant type and resource can be modified in the database. In addition, a new client secret can be generated if new_client_secret is set to True.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">oauth</span><span class="o">.</span><span class="n">update_client</span><span class="p">(</span><span class="n">client_id</span><span class="o">=</span><span class="s1">&#39;0083c1b7e3a6ceeac4a4f47bd3a1b501&#39;</span><span class="p">,</span>
+                    <span class="n">grant_type</span><span class="o">=</span><span class="s1">&#39;another grant type&#39;</span><span class="p">,</span>
+                    <span class="n">resource</span><span class="o">=</span><span class="s1">&#39;another resource&#39;</span><span class="p">,</span>
+                    <span class="n">new_client_secret</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="run-the-authorization-server">
+<h3>Run the Authorization Server<a class="headerlink" href="#run-the-authorization-server" title="Link to this heading">¶</a></h3>
+<p>The authorization server is a Flask server configured with a “/token” route.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span> <span class="o">=</span> <span class="n">oauth</span><span class="o">.</span><span class="n">auth_server</span><span class="p">()</span>
+<span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The run method of app is appropriate for testing locally. In production, please use a WSGI production server such as <a class="reference external" href="https://gunicorn.org/">Gunicorn</a></p>
+</section>
+<section id="request-a-token">
+<h3>Request a Token<a class="headerlink" href="#request-a-token" title="Link to this heading">¶</a></h3>
+<p>The Authorization server must be running to request a token.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">token</span> <span class="o">=</span> <span class="n">client_request_token</span><span class="p">(</span><span class="s1">&#39;client_credentials&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;0083c1b7e3a6ceeac4a4f47bd3a1b501&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;PRIVATE-qGSUlXIyQVFB_xfPnHOy6WWGMER5uCgZyaKWgJw-ggQ&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;api_v0.0.1&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;http://127.0.0.1:5001/token&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="run-the-resource-server">
+<h3>Run the Resource Server<a class="headerlink" href="#run-the-resource-server" title="Link to this heading">¶</a></h3>
+<p>The resource server is a Flask server. The user can specify two parameters:</p>
+<ol class="arabic simple">
+<li><p>The default api route (‘api_v0.0.1’ in the example below).</p></li>
+<li><p>The path and filename of the protected resource. <em>Note</em> the protected resource must be a json file.</p></li>
+<li><p>As with the Authorization server, the run method is appropriate for local testing but a production WSGI server should be used in production.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span> <span class="o">=</span> <span class="n">oauth</span><span class="o">.</span><span class="n">resource_server</span><span class="p">(</span><span class="s1">&#39;api_v0.0.1&#39;</span><span class="p">,</span><span class="s1">&#39;protected_resource.json&#39;</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5001</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="request-protected-resource">
+<h3>Request Protected Resource<a class="headerlink" href="#request-protected-resource" title="Link to this heading">¶</a></h3>
+<p>The Resource Server must be running to request the protected resource.
+<em>Note</em> The route /api_v0.0.1 is the same route specified when starting the Resource Server.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This uses the token variable from the initial token request.</span>
+<span class="n">client_request_resource</span><span class="p">(</span><span class="s1">&#39;http://127.0.0.1:5001/api_v0.0.1&#39;</span><span class="p">,</span><span class="n">token</span><span class="p">)</span>
+<span class="c1"># returns the protected resource as a json string.</span>
+<span class="c1"># {&quot;about&quot;: &quot;This is a protected resource&quot;}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="future-efforts">
+<h2>Future Efforts<a class="headerlink" href="#future-efforts" title="Link to this heading">¶</a></h2>
+<p>Add targeted error handling classes to improve user experience.</p>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
+<p>MIT</p>
+</section>
+<section id="authors">
+<h2>Authors<a class="headerlink" href="#authors" title="Link to this heading">¶</a></h2>
+<p>John Glauber</p>
+</section>
+<section id="contact">
+<h2>Contact<a class="headerlink" href="#contact" title="Link to this heading">¶</a></h2>
+<p>For any questions, comments, or suggestions please reach out via email to:</p>
+<p><a class="reference external" href="mailto:johnbglauber&#37;&#52;&#48;gmail&#46;com">johnbglauber<span>&#64;</span>gmail<span>&#46;</span>com</a><br />
+<a class="reference external" href="https://github.com/jglauber/OAuth">https://github.com/jglauber/OAuth</a></p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">oauth_client</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Welcome to OAuth_Client</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#program-structure">Program Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-usage">Example Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#future-efforts">Future Efforts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#authors">Authors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contact">Contact</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">OAuth_Client Documentation</a></li>
+      <li>Next: <a href="api.html" title="next chapter">API</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, John Glauber.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/README.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
