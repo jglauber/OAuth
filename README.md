@@ -37,9 +37,9 @@ PostgreSQL will create a postgres superuser by default. We recommend creating tw
 9. `CREATE TABLE stored_tokens;`
 10. `GRANT SELECT ON stored_tokens TO auth_client;` to allow the viewer user access to view the contents of the table.
 
-After all the prerequisites have been met, you can install the package locally, using the following command from the root of the repo.
+After all the prerequisites have been met, you can install the package:
 
-`pip install -e .`
+`pip install oauth-client`
 
 ## Program Structure
 
