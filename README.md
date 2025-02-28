@@ -154,6 +154,10 @@ client_request_resource('http://127.0.0.1:5001/api_v0.0.1',token)
 # {"about": "This is a protected resource"}
 ```
 
+## Future Efforts
+
+Add targeted error handling classes to improve user experience.
+
 ## License
 
 MIT

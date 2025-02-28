@@ -3,6 +3,7 @@ from oauth_client.client_management.client_generator import Client
 from oauth_client.client_management.signature_generator import retrieve_kid, retrieve_private_key, retrieve_pub_key
 import jwt
 import time
+from typing import Optional
 
 
 def create_auth_server(db: str,
@@ -11,7 +12,33 @@ def create_auth_server(db: str,
                        username: str,
                        issuer: str,
                        subject: str,
-                       audience: str):
+                       audience: str) -> Flask:
+    """
+    Create the Flask server to handle token requests.
+
+    Parameters
+    ----------
+    db : str
+        The name of the PostgreSQL database.
+    host : str
+        The host IP address for the PostgreSQL database.
+    table_name : str
+        The name of the table storing the client credentials.
+    username : str
+        The username of the resource owner that is the signer of the jwt token.
+    issuer : str
+        The issuer of the token.
+    subject : str
+        The subject of the token.
+    audience : str
+        The audience of the token.
+    
+    Returns
+    -------
+    Flask
+        A flask server object.
+    """
+
     app = Flask(__name__)
 
     @app.route('/token', methods=['POST','GET'])
@@ -48,6 +75,10 @@ def create_auth_server(db: str,
     return app
 
 """
+The following are the types of invalid codes.
+
+TO DO: Ensure that server generates these responses in the future.
+
 invalid_request
     The request is missing a required parameter, includes an
     unsupported parameter value (other than grant type),
@@ -81,11 +112,23 @@ unauthorized_client
 unsupported_grant_type
     The authorization grant type is not supported by the
     authorization server.
-
 """
 
 class CreateToken:
-    def __init__(self, iss, sub, aud, username, resource):
+    """
+    A class for use by the Authorization server to create a new token for an authorized client.
+
+    ...
+
+    Attributes
+    ----------
+
+    Methods
+    -------
+    generate_new_token()
+        Creates a new signed jwt token.
+    """
+    def __init__(self, iss: str, sub: str, aud: str, username: str, resource: str):
         self.iss = iss
         self.sub = sub
         self.aud = aud
@@ -98,7 +141,20 @@ class CreateToken:
                 "aud": self.aud}
         self.additional_headers = {"kid": self.kid}
 
-    def generate_new_token(self):
+    def generate_new_token(self) -> dict:
+        """
+        Create the new token.
+
+        Returns
+        -------
+        dict
+            a dictionary with:
+            * token_type: The grant type.
+            * expires_on: The unix timestamp of token expiry.
+            * not_before: The unix timestamp of token expiry.
+            * resource: The authorized resource
+            * access_token: The jwt access token.
+        """
         iat = time.time()
         exp = iat + 3600
         payload = self.payload
@@ -114,7 +170,27 @@ class CreateToken:
         
         return token_dict
     
-def decode_token(token,public_key,aud,iss):
+def decode_token(token: str, public_key: str, aud: str, iss: str) -> Optional[bool]:
+    """
+    A function to decode a jwt token and confirm its validity.
+
+    Parameters
+    ----------
+    token
+        The token string.
+    public_key
+        The public key used to sign the token.
+    aud : str
+        The audience of the token.
+    iss : str
+        The issuer of the token.
+
+    Returns
+    -------
+    literal[True] | None
+        True if token is valid otherwise returns None.
+    """
+
     try:
         jwt.decode(token,public_key, algorithms=['RS256'],audience=aud, issuer=iss)
         print("Token is valid.")

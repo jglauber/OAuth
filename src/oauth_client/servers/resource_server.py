@@ -6,7 +6,27 @@ def create_resource_server(username: str,
                            issuer: str,
                            api_route: str,
                            resource_path: str
-                           ):
+                           ) -> Flask:
+    """
+    Create the resource server to handle requests for the protected resource.
+
+    Parameters
+    ----------
+    username : str
+        The username of the resource server owner that signed the token.
+    issuer : str
+        The issuer of the token.
+    api_route : str
+        The URL route to host the resource server.
+    resource_path : str
+        The relative path of the json file on the resource server.
+
+    Returns
+    -------
+    Flask
+        a flask server object.
+    """
+
     app = Flask(__name__)
 
     @app.route(f'/{api_route}')
