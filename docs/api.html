@@ -5,16 +5,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>API &#8212; oauth_client 0.0.1 documentation</title>
+    <title>API &#8212; oauth_client 0.0.3 documentation</title>
     <link rel="stylesheet" type="text/css" href="static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="static/alabaster.css?v=27fed22d" />
-    <script src="static/documentation_options.js?v=d45e8c67"></script>
+    <script src="static/documentation_options.js?v=47de8214"></script>
     <script src="static/doctools.js?v=9bcbadda"></script>
     <script src="static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Welcome to OAuth_Client" href="README.html" />
+    <link rel="prev" title="Welcome to Steelcut-OAuth" href="README.html" />
    
   <link rel="stylesheet" href="static/custom.css" type="text/css" />
   
@@ -169,7 +169,7 @@
 <dl>
 <dt><strong>The Client Management Module</strong></dt><dd><dl class="py class" id="module-oauth_client.client_management">
 <dt class="sig sig-object py" id="oauth_client.client_management.Client">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">Client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grant_type:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'client_credentials'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_date:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'27022025_12:00:47'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_client:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.Client" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">oauth_client.client_management.</span></span><span class="sig-name descname"><span class="pre">Client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grant_type:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'client_credentials'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_date:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'23052025_12:14:33'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_client:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#oauth_client.client_management.Client" title="Link to this definition">¶</a></dt>
 <dd><p>A class to handle creation and maintenance of authorized clients.</p>
 <p>…</p>
 <section id="id3">
@@ -870,7 +870,7 @@ The file should contain a string in the format:</p>
 </dd>
 <dt><strong>Resource Server</strong></dt><dd><dl class="py function" id="module-oauth_client.servers.resource_server">
 <dt class="sig sig-object py" id="oauth_client.servers.resource_server.create_resource_server">
-<span class="sig-prename descclassname"><span class="pre">oauth_client.servers.resource_server.</span></span><span class="sig-name descname"><span class="pre">create_resource_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Flask</span></span></span><a class="headerlink" href="#oauth_client.servers.resource_server.create_resource_server" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">oauth_client.servers.resource_server.</span></span><span class="sig-name descname"><span class="pre">create_resource_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issuer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audience</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Flask</span></span></span><a class="headerlink" href="#oauth_client.servers.resource_server.create_resource_server" title="Link to this definition">¶</a></dt>
 <dd><p>Create the resource server to handle requests for the protected resource.</p>
 <section id="id51">
 <h3>Parameters<a class="headerlink" href="#id51" title="Link to this heading">¶</a></h3>
@@ -878,6 +878,8 @@ The file should contain a string in the format:</p>
 <dt>username<span class="classifier">str</span></dt><dd><p>The username of the resource server owner that signed the token.</p>
 </dd>
 <dt>issuer<span class="classifier">str</span></dt><dd><p>The issuer of the token.</p>
+</dd>
+<dt>audience: str</dt><dd><p>The recipient for which the token is intended i.e. the resource server.</p>
 </dd>
 <dt>api_route<span class="classifier">str</span></dt><dd><p>The URL route to host the resource server.</p>
 </dd>
@@ -927,7 +929,7 @@ The file should contain a string in the format:</p>
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="README.html">Welcome to OAuth_Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README.html">Welcome to Steelcut-OAuth</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#oauth">1. OAuth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#client-management">2. Client management</a></li>
@@ -940,7 +942,7 @@ The file should contain a string in the format:</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="README.html" title="previous chapter">Welcome to OAuth_Client</a></li>
+      <li>Previous: <a href="README.html" title="previous chapter">Welcome to Steelcut-OAuth</a></li>
   </ul></li>
 </ul>
 </div>
@@ -960,7 +962,7 @@ The file should contain a string in the format:</p>
       &#169;2025, John Glauber.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.1</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

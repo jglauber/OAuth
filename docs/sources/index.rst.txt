@@ -1,6 +1,6 @@
-OAuth_Client Documentation
-==========================
-OAuth_Client is a Python tool to handle the client credential OAuth2.0 specification.
+Steelcut-OAuth Documentation
+============================
+Steelcut-OAuth is a Python tool to handle the client credential OAuth2.0 specification.
 
 
 .. toctree::
