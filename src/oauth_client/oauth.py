@@ -243,7 +243,7 @@ class OAuth:
             the Flask app
         """
 
-        app = create_resource_server(self.username, self.iss, api_route, resource_path)
+        app = create_resource_server(self.username, self.iss, self.aud, api_route, resource_path)
         return app
 
 def client_request_token(grant_type: str,client_id: str, client_secret: str,

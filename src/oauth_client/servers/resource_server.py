@@ -4,6 +4,7 @@ import json
 
 def create_resource_server(username: str,
                            issuer: str,
+                           audience: str,
                            api_route: str,
                            resource_path: str
                            ) -> Flask:
@@ -16,6 +17,8 @@ def create_resource_server(username: str,
         The username of the resource server owner that signed the token.
     issuer : str
         The issuer of the token.
+    audience: str
+        The recipient for which the token is intended i.e. the resource server.
     api_route : str
         The URL route to host the resource server.
     resource_path : str
@@ -33,7 +36,7 @@ def create_resource_server(username: str,
     def get():
         if request.method == 'GET' and request.content_type == 'application/json':
             token = request.authorization.token
-            result = decode_token(token,retrieve_pub_key(username),api_route,issuer)
+            result = decode_token(token,retrieve_pub_key(username),audience,issuer)
             if result:
                 with open(resource_path, 'r') as f:
                     data = json.load(f)

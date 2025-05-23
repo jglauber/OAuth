@@ -1,4 +1,4 @@
-# Welcome to OAuth_Client
+# Welcome to Steelcut-OAuth
 
 A tool written in Python 3.13 to implement OAuth2.0 using the client credentials grant type. This is intended for machine to machine APIs and integrates with a PostgreSQL server for storing client ids and hashed/salted client secrets. Please see requirements.txt for the full list of dependencies.
 
@@ -37,9 +37,9 @@ PostgreSQL will create a postgres superuser by default. We recommend creating tw
 9. `CREATE TABLE stored_tokens;`
 10. `GRANT SELECT ON stored_tokens TO auth_client;` to allow the viewer user access to view the contents of the table.
 
-After all the prerequisites have been met, you can install the package locally, using the following command from the root of the repo.
+After all the prerequisites have been met, you can install the package:
 
-`pip install -e .`
+`pip install steelcut-oauth`
 
 ## Program Structure
 
